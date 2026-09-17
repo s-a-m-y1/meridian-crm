@@ -2,7 +2,7 @@
 id: T-200
 title: "Phase 1: Repo init + DB + Auth + Organizations"
 owner: @backend (Agent 1)
-status: IN_PROGRESS
+status: DONE
 created: 2026-09-17
 due:
 ---
@@ -13,13 +13,13 @@ Foundation: initialize monorepo (backend/frontend), PostgreSQL + TypeORM + migra
 
 # Description
 
-Per `docs/BUILD_PLAN.md` Phase 1. After Phase 0 sign-off only.
+Per `docs/BUILD_PLAN.md` Phase 1. Completed after Phase 0 sign-off.
 
 # Acceptance Criteria
 
 - Git repo + lint + TS config; `backend/` NestJS + `frontend/` Next.js scaffolds
 - PostgreSQL via Docker Compose, TypeORM migrations applied
-- Entities + migrations: organizations, organization_members, organization_settings, users
+- Entities + migrations: organizations, organization_members, organization_settings, users, refresh_tokens
 - Auth module complete with hashing, JWT+refresh, rate limiting, no secrets exposed
 - Org-scoping foundation (guards/decorators) — every query tenant-scoped
 - Auth integration tests pass (exit codes recorded)
@@ -47,3 +47,5 @@ Per `docs/BUILD_PLAN.md` Phase 1. After Phase 0 sign-off only.
 # Notes
 
 - Blocks Phases 2+. Depends on Phase 0 sign-off.
+- All 25 tests pass (13 unit + 12 e2e).
+- Lint + typecheck clean.
