@@ -7,6 +7,13 @@ import { configuration, validateEnv } from './config/configuration';
 import { AuthModule } from './modules/auth/auth.module';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
 import { UsersModule } from './modules/users/users.module';
+import { CustomersModule } from './modules/customers/customers.module';
+import { LeadsModule } from './modules/leads/leads.module';
+import { PropertiesModule } from './modules/properties/properties.module';
+import { DealsModule } from './modules/deals/deals.module';
+import { TasksModule } from './modules/tasks/tasks.module';
+import { ActivitiesModule } from './modules/activities/activities.module';
+import { NotesModule } from './modules/notes/notes.module';
 import { HealthModule } from './health/health.module';
 import { AuthGuard } from './common/guards/auth.guard';
 
@@ -50,6 +57,13 @@ import { AuthGuard } from './common/guards/auth.guard';
     }),
     UsersModule,
     OrganizationsModule,
+    CustomersModule,
+    LeadsModule,
+    PropertiesModule,
+    DealsModule,
+    TasksModule,
+    ActivitiesModule,
+    NotesModule,
     AuthModule,
     HealthModule,
   ],
