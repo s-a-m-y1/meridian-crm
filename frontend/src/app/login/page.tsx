@@ -87,15 +87,9 @@ export default function LoginPage() {
                     id="email"
                     placeholder="you@example.com"
                     className="pl-10"
-                    error={errors.email?.message}
                     disabled={isLoading}
                   />
                 </div>
-                {errors.email && (
-                  <p className="text-sm text-red-600 dark:text-red-400" role="alert">
-                    {errors.email.message}
-                  </p>
-                )}
               </div>
 
               <div>
@@ -118,7 +112,6 @@ export default function LoginPage() {
                     id="password"
                     placeholder="••••••••"
                     className="pl-10 pr-10"
-                    error={errors.password?.message}
                     disabled={isLoading}
                   />
                   <button
@@ -130,11 +123,6 @@ export default function LoginPage() {
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
-                {errors.password && (
-                  <p className="text-sm text-red-600 dark:text-red-400" role="alert">
-                    {errors.password.message}
-                  </p>
-                )}
               </div>
 
               <Button type="submit" className="w-full" disabled={isLoading} size="lg">

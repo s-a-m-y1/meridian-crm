@@ -38,7 +38,6 @@ export default function RegisterPage() {
     register,
     handleSubmit,
     formState: { errors },
-    watch,
   } = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
   });
@@ -48,6 +47,7 @@ export default function RegisterPage() {
     setIsLoading(true);
     try {
       await authRegister(data.email, data.name, data.password);
+      // Redirect is handled by authRegister via auth-context
     } catch (err: any) {
       setError(err.response?.data?.message || "Registration failed. Please try again.");
     } finally {
@@ -95,15 +95,9 @@ export default function RegisterPage() {
                     id="name"
                     placeholder="John Doe"
                     className="pl-10"
-                    error={errors.name?.message}
                     disabled={isLoading}
                   />
                 </div>
-                {errors.name && (
-                  <p className="text-sm text-red-600 dark:text-red-400" role="alert">
-                    {errors.name.message}
-                  </p>
-                )}
               </div>
 
               <div>
@@ -120,15 +114,9 @@ export default function RegisterPage() {
                     id="email"
                     placeholder="you@example.com"
                     className="pl-10"
-                    error={errors.email?.message}
                     disabled={isLoading}
                   />
                 </div>
-                {errors.email && (
-                  <p className="text-sm text-red-600 dark:text-red-400" role="alert">
-                    {errors.email.message}
-                  </p>
-                )}
               </div>
 
               <div>
@@ -145,7 +133,6 @@ export default function RegisterPage() {
                     id="password"
                     placeholder="••••••••"
                     className="pl-10 pr-10"
-                    error={errors.password?.message}
                     disabled={isLoading}
                   />
                   <button
@@ -166,11 +153,6 @@ export default function RegisterPage() {
                     )}
                   </button>
                 </div>
-                {errors.password && (
-                  <p className="text-sm text-red-600 dark:text-red-400" role="alert">
-                    {errors.password.message}
-                  </p>
-                )}
               </div>
 
               <div>
@@ -187,7 +169,6 @@ export default function RegisterPage() {
                     id="confirmPassword"
                     placeholder="••••••••"
                     className="pl-10 pr-10"
-                    error={errors.confirmPassword?.message}
                     disabled={isLoading}
                   />
                   <button
@@ -208,11 +189,6 @@ export default function RegisterPage() {
                     )}
                   </button>
                 </div>
-                {errors.confirmPassword && (
-                  <p className="text-sm text-red-600 dark:text-red-400" role="alert">
-                    {errors.confirmPassword.message}
-                  </p>
-                )}
               </div>
 
               <Button type="submit" className="w-full" disabled={isLoading} size="lg">

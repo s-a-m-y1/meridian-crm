@@ -53,20 +53,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       router.push("/login");
     }
     if (!loading && (pathname === "/login" || pathname === "/register") && user) {
-      router.push("/");
+      router.push("/dashboard");
     }
   }, [user, loading, pathname, router]);
 
   const login = async (email: string, password: string) => {
     await api.login({ email, password });
     await refreshUser();
-    router.push("/");
+    router.push("/dashboard");
   };
 
   const register = async (email: string, name: string, password: string) => {
     await api.register({ email, name, password });
     await refreshUser();
-    router.push("/");
+    router.push("/dashboard");
   };
 
   const logout = async () => {
