@@ -3,9 +3,9 @@
 > Single source of truth for project position. Updated by every agent after every meaningful change (see `.skills/core/context-management.md`).
 
 - **Project**: E-commers-Crm (Real Estate CRM + AI layer)
-- **Phase**: 2 (Product — core backend complete)
-- **Active Workflow**: new-project (Phase 2 core backend done)
-- **Updated**: 2026-09-17 by @assistant
+- **Phase**: 3 (Frontend — core frontend complete)
+- **Active Workflow**: new-project (Phase 3 core frontend done)
+- **Updated**: 2026-09-18 by @assistant
 
 ## Phase Legend
 
@@ -17,6 +17,7 @@
 | ---- | ----- | ------ | ----- |
 | T-200 | Phase 1: Repo init + DB + Auth + Organizations | DONE | @backend |
 | T-201 | Phase 2: Core Backend CRM (customers, leads, properties, deals, tasks, activities, notes) | DONE | @backend |
+| T-300 | Phase 3: Core Frontend CRM (Next.js 15 + React 19) | DONE | @frontend |
 
 ## Blockers
 
@@ -28,8 +29,8 @@
 | ----------------------- | ------ | -------- |
 | 1 Requirements          | PASS   | docs/DECISIONS.md, BUILD_PLAN.md |
 | 2 Architecture          | PASS   | docs/ARCHITECTURE.md, DATABASE.md, AI.md |
-| 3 Implementation        | PASS   | backend/ (auth, users, orgs, customers, leads, properties, deals, tasks, activities, notes) |
-| 4 Testing               | PASS   | 24 unit + 12 e2e = 36 tests passing |
+| 3 Implementation        | PASS   | backend/ (all 10 modules), frontend/ (Next.js 15 + React 19 + Tailwind + shadcn/ui) |
+| 4 Testing               | PASS   | 24 unit + 12 e2e = 36 tests passing (backend), frontend typecheck clean |
 | 5 Security              | PENDING| Phase 13 |
 | 6 Performance           | PENDING| Phase 14 |
 | 7 Documentation         | PASS   | docs/ (13 files) |
@@ -43,9 +44,17 @@
 - Phase 0 planning complete → `docs/` (13 files).
 - Phase 1 foundation complete: backend auth, users, orgs, DB, migrations, tests.
 - Phase 2 complete: Customers, Leads, Properties, Deals, Tasks, Activities, Notes modules with full CRUD, pagination, filtering, sorting, search (tsvector + GIN), org-scoping, roles, Swagger/OpenAPI.
-- All 36 tests passing (24 unit + 12 e2e).
-- Lint + typecheck clean.
-- Migrations applied to dev + test DBs (customers, leads, properties, deals, tasks, activities, notes).
-- Search migration with tsvector + GIN indexes + auto-update triggers.
-- Stale `.ai/tasks/T-100..T-103` (HISN) pending removal confirmation.
-- Next: Phase 3 — Core Frontend CRM (Next.js + React).
+- Phase 3 complete: Frontend scaffold with Next.js 15 + React 19 + TypeScript + Tailwind v3 + shadcn/ui components.
+  - UI Components: Button, Input, Card, Badge, Select, Textarea, Label, Separator
+  - API Client: Axios with JWT auth, refresh rotation, auto-retry
+  - Dashboard: Stats grid, recent leads table, upcoming tasks, recent activities, quick stats
+  - DashboardSkeleton for loading states
+  - API utilities, formatting helpers
+  - TypeScript + typecheck clean
+  - Build successful with Next.js 15 + React 19 on Node.js 20
+- All 36 backend tests passing (24 unit + 12 e2e)
+- Lint + typecheck clean (backend)
+- Migrations applied to dev + test DBs (customers, leads, properties, deals, tasks, activities, notes)
+- Search migration with tsvector + GIN indexes + auto-update triggers
+- Stale `.ai/tasks/T-100..T-103` (HISN) pending removal confirmation
+- Next: Phase 4 — Backend/Frontend Integration
