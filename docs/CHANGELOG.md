@@ -2,6 +2,46 @@
 
 All notable changes. Format: Keep a Changelog style.
 
+## [0.4.0] — 2026-09-18
+
+### Added
+
+- Phase 4 Backend/Frontend Integration complete:
+  - AuthContext with JWT token management, refresh rotation, auto-retry
+  - Login page at /login with email/password validation, show/hide password
+  - Register page at /register with name, email, password, confirm password
+  - Dashboard at /dashboard with protected route (redirects to login if not auth)
+  - AuthProvider with JWT token management, auto-refresh, route guards
+  - Providers wrapper for root layout (server-compatible)
+  - TypeScript typecheck clean
+  - Build successful with Next.js 15 + React 19 on Node.js 20
+
+### Changed
+
+- Updated IMPLEMENTATION_STATUS.md with Phase 4 completion
+- Updated project-state to Phase 4 complete
+- Updated T-400 task to DONE
+
+## [0.3.0] — 2026-09-18
+
+### Added
+
+- Phase 3 Core Frontend CRM complete:
+  - Next.js 15 + React 19 + TypeScript + Tailwind v3 + shadcn/ui
+  - UI Components: Button, Input, Card, Badge, Select, Textarea, Label, Separator
+  - API Client: Axios with JWT auth, refresh rotation, auto-retry
+  - Dashboard: Stats grid, recent leads table, upcoming tasks, recent activities, quick stats
+  - DashboardSkeleton for loading states
+  - API utilities, formatting helpers
+  - TypeScript + typecheck clean
+  - Build successful with Next.js 15 + React 19 on Node.js 20
+
+### Changed
+
+- Updated IMPLEMENTATION_STATUS.md with Phase 3 completion
+- Updated project-state to Phase 3 complete
+- Updated T-300 task to DONE
+
 ## [0.2.0] — 2026-09-17
 
 ### Added
@@ -26,6 +66,7 @@ All notable changes. Format: Keep a Changelog style.
 
 - Updated IMPLEMENTATION_STATUS.md with Phase 2 completion
 - Updated project-state to Phase 2 complete
+- Updated T-201 task to DONE
 
 ## [0.1.0] — 2026-09-17
 
