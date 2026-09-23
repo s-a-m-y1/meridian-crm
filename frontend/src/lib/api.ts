@@ -8,7 +8,7 @@ class ApiClient {
 
   constructor() {
     this.client = axios.create({
-      baseURL: `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/v1`,
+      baseURL: "/api",
       headers: {
         "Content-Type": "application/json",
       },
@@ -44,6 +44,8 @@ class ApiClient {
             if (typeof window !== "undefined") {
               localStorage.removeItem("access_token");
               localStorage.removeItem("refresh_token");
+              document.cookie = "access_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+              document.cookie = "refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
               window.location.href = "/login";
             }
             return Promise.reject(refreshError);
@@ -67,7 +69,7 @@ class ApiClient {
       }
 
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/v1/auth/refresh`,
+        "/api/auth/refresh",
         { refreshToken },
         { withCredentials: true }
       );
@@ -75,6 +77,11 @@ class ApiClient {
       const { accessToken, refreshToken: newRefreshToken } = response.data;
       localStorage.setItem("access_token", accessToken);
       localStorage.setItem("refresh_token", newRefreshToken);
+      
+      // Also set cookies for middleware
+      document.cookie = `access_token=${accessToken}; path=/; max-age=86400; SameSite=Lax`;
+      document.cookie = `refresh_token=${newRefreshToken}; path=/; max-age=2592000; SameSite=Lax; HttpOnly`;
+      
       return accessToken;
     })();
 
@@ -87,11 +94,14 @@ class ApiClient {
 
   setAuthToken(token: string) {
     localStorage.setItem("access_token", token);
+    document.cookie = `access_token=${token}; path=/; max-age=86400; SameSite=Lax`;
   }
 
   clearAuth() {
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
+    document.cookie = "access_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+    document.cookie = "refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
   }
 
   // Auth
@@ -100,6 +110,8 @@ class ApiClient {
     const { accessToken, refreshToken } = response.data;
     localStorage.setItem("access_token", accessToken);
     localStorage.setItem("refresh_token", refreshToken);
+    document.cookie = `access_token=${accessToken}; path=/; max-age=86400; SameSite=Lax`;
+    document.cookie = `refresh_token=${refreshToken}; path=/; max-age=2592000; SameSite=Lax; HttpOnly`;
     return response.data;
   }
 
@@ -108,6 +120,8 @@ class ApiClient {
     const { accessToken, refreshToken } = response.data;
     localStorage.setItem("access_token", accessToken);
     localStorage.setItem("refresh_token", refreshToken);
+    document.cookie = `access_token=${accessToken}; path=/; max-age=86400; SameSite=Lax`;
+    document.cookie = `refresh_token=${refreshToken}; path=/; max-age=2592000; SameSite=Lax; HttpOnly`;
     return response.data;
   }
 
@@ -239,8 +253,16 @@ class ApiClient {
     return this.client.get("/activities", { params });
   }
 
+  async getActivity(id: string) {
+    return this.client.get(`/activities/${id}`);
+  }
+
   async createActivity(data: unknown) {
     return this.client.post("/activities", data);
+  }
+
+  async deleteActivity(id: string) {
+    return this.client.delete(`/activities/${id}`);
   }
 
   // Notes
@@ -262,6 +284,114 @@ class ApiClient {
 
   async deleteNote(id: string) {
     return this.client.delete(`/notes/${id}`);
+  }
+
+  // Files
+  async getFiles(params?: Record<string, unknown>) {
+    return this.client.get("/files", { params });
+  }
+
+  async getFile(id: string) {
+    return this.client.get(`/files/${id}`);
+  }
+
+  async presignUpload(data: unknown) {
+    return this.client.post("/files/presign", data);
+  }
+
+  async confirmUpload(data: unknown) {
+    return this.client.post("/files/confirm", data);
+  }
+
+  async deleteFile(id: string) {
+    return this.client.delete(`/files/${id}`);
+  }
+
+  // Security
+  async checkPasswordStrength(password: string) {
+    return this.client.post("/security/password/check", { password });
+  }
+
+  async getPasswordRequirements() {
+    return this.client.get("/security/password/requirements");
+  }
+
+  async runSecurityAudit() {
+    return this.client.post("/security/audit/scan");
+  }
+
+  async getSecurityAuditReport() {
+    return this.client.get("/security/audit/report");
+  }
+
+  // AI
+  async aiChat(data: { message: string; conversationId?: string }) {
+    return this.client.post("/ai/chat", data);
+  }
+
+  async aiScoreLead(leadId: string) {
+    return this.client.post("/ai/features/score_lead", { leadId });
+  }
+
+  async aiMatchProperties(leadId: string) {
+    return this.client.post("/ai/features/match_properties", { leadId });
+  }
+
+  async aiForecastDeal(dealId: string) {
+    return this.client.post("/ai/features/forecast_deal", { dealId });
+  }
+
+  async aiGenerateFollowUp(leadId: string, channel: 'email' | 'whatsapp' | 'sms' = 'email') {
+    return this.client.post("/ai/features/follow_up", { leadId, channel });
+  }
+
+  async aiGetBriefing() {
+    return this.client.get("/ai/briefing");
+  }
+
+  async aiGetAnalytics(query: string) {
+    return this.client.post("/ai/analytics", { query });
+  }
+
+  async aiGetNeglectedLeads(daysThreshold?: number) {
+    return this.client.get("/ai/neglected-leads", { params: { daysThreshold } });
+  }
+
+  // Dashboard
+  async getDashboardStats() {
+    return this.client.get("/dashboard/stats");
+  }
+
+  async getRecentLeads(limit?: number) {
+    return this.client.get("/dashboard/leads/recent", { params: { limit } });
+  }
+
+  async getUpcomingTasks(limit?: number) {
+    return this.client.get("/dashboard/tasks/upcoming", { params: { limit } });
+  }
+
+  async getRecentActivities(limit?: number) {
+    return this.client.get("/dashboard/activities/recent", { params: { limit } });
+  }
+
+  async getPipeline() {
+    return this.client.get("/dashboard/pipeline");
+  }
+
+  async getSalesAnalytics() {
+    return this.client.get("/dashboard/analytics/sales");
+  }
+
+  async getConversionMetrics(period?: string) {
+    return this.client.get("/dashboard/analytics/conversion", { params: { period } });
+  }
+
+  async getRevenueAnalytics(period?: string) {
+    return this.client.get("/dashboard/analytics/revenue", { params: { period } });
+  }
+
+  async getTeamPerformance() {
+    return this.client.get("/dashboard/analytics/team-performance");
   }
 }
 

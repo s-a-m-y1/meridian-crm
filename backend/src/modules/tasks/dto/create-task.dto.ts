@@ -1,5 +1,4 @@
-import { IsString, IsOptional, IsEnum, IsUUID, Length, MaxLength } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsString, IsOptional, IsEnum, IsUUID, Length, MaxLength, IsDateString } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export enum TaskStatus {
@@ -27,8 +26,8 @@ export class CreateTaskDto {
 
   @ApiPropertyOptional({ example: '2026-09-20T10:00:00Z' })
   @IsOptional()
-  @Type(() => Date)
-  dueAt?: Date;
+  @IsDateString()
+  dueAt?: string;
 
   @ApiPropertyOptional({ enum: ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'] })
   @IsOptional()

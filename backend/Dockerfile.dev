@@ -1,0 +1,21 @@
+# Backend Development Dockerfile with hot reload
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install dependencies
+# (--legacy-peer-deps removed: npm resolves this tree cleanly without it,
+#  verified via `npm install --dry-run` — do not re-add without a reason.)
+COPY package.json package-lock.json* ./
+RUN npm install --prefer-offline --no-audit --progress=false
+
+# Expose ports: 4000 = API, 9229 = node inspector (used by start:debug)
+EXPOSE 4000 9229
+
+# Container is healthy once the Nest app is serving the liveness endpoint.
+# Dev container compiles at startup, so allow a generous start period.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+  CMD wget -qO- http://127.0.0.1:4000/api/v1/health/liveness || exit 1
+
+# Start with hot reload + inspector on 0.0.0.0:9229 (matches EXPOSE above)
+CMD ["npm", "run", "start:debug"]

@@ -17,7 +17,7 @@ You are an AI engineering agent operating with the Skills System in `.skills/`.
 
 ## Quick Example
 
-1. Create a new task from the template: copy `.ai/tasks/T-000-template.md` → `.ai/tasks/T-123.md` and fill fields.
+1. Create a new task from the template: copy `.ai/tasks/T-000-template.md` to `.ai/tasks/T-<id>.md` (e.g. `T-123.md`) and fill fields.
 2. Run validation: `python3 scripts/validate_skills_refs.py`.
 3. Run auto-review to format and collect lint: `python3 scripts/auto_review.py --apply`.
 4. Open a PR using the provided `.github/PULL_REQUEST_TEMPLATE.md` and ensure CI passes.
@@ -28,8 +28,8 @@ See `.skills/templates/` for task and skill templates and `.skills/examples/` fo
 
 - Never skip a quality gate. Never claim success without evidence.
 - Never modify files outside the current task's declared scope.
-- Parallel agents must follow `core/multi-agent.md` (file ownership + worktrees). Never edit a file you do not own.
-- Every completed unit of work ends with the structured result in `core/output-standard.md`.
+- Parallel agents must follow `.skills/core/multi-agent.md` (file ownership + worktrees). Never edit a file you do not own.
+- Every completed unit of work ends with the structured result in `.skills/core/output-standard.md`.
 
 ## Task File Format
 

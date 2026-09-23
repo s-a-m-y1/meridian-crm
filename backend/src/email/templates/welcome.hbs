@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to E-commers-Crm</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f3f4f6;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+    <tr>
+      <td style="padding: 40px;">
+        <!-- Header -->
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+          <tr>
+            <td style="text-align: center; padding-bottom: 24px; border-bottom: 1px solid #e5e7eb;">
+              <h1 style="margin: 0; color: #111827; font-size: 24px; font-weight: 600;">E-commers-Crm</h1>
+            </td>
+          </tr>
+        </table>
+
+        <!-- Content -->
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="padding-top: 32px;">
+          <tr>
+            <td style="color: #374151; font-size: 16px; line-height: 1.6;">
+              <p style="margin: 0 0 16px;">Hi {{name}},</p>
+              <p style="margin: 0 0 16px;">Welcome to E-commers-Crm! Your account has been created successfully.</p>
+              <p style="margin: 0 0 24px;">You can now log in and start managing your real estate leads, properties, and deals.</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="text-align: center; padding: 16px 0;">
+              <a href="{{loginUrl}}" style="display: inline-block; background-color: #0ea5e9; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 6px; font-weight: 600; font-size: 16px;">Log In to Your Account</a>
+            </td>
+          </tr>
+          <tr>
+            <td style="color: #6b7280; font-size: 14px; line-height: 1.6; padding-top: 24px;">
+              <p style="margin: 0 0 16px;">Here are a few things you can do with E-commers-Crm:</p>
+              <ul style="margin: 0 0 16px; padding-left: 20px;">
+                <li style="margin-bottom: 8px;">Manage leads through customizable Kanban boards</li>
+                <li style="margin-bottom: 8px;">Track properties, deals, and client relationships</li>
+                <li style="margin-bottom: 8px;">Automate tasks and follow-ups with AI insights</li>
+                <li style="margin-bottom: 8px;">Generate daily briefings and analytics reports</li>
+              </ul>
+              <p style="margin: 0;">Need help? Contact <a href="mailto:{{supportEmail}}" style="color: #0ea5e9;">{{supportEmail}}</a>.</p>
+            </td>
+          </tr>
+        </table>
+
+        <!-- Footer -->
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="padding-top: 32px; border-top: 1px solid #e5e7eb;">
+          <tr>
+            <td style="text-align: center; color: #9ca3af; font-size: 12px;">
+              <p style="margin: 0;">© {{year}} E-commers-Crm. All rights reserved.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

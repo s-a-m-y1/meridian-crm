@@ -1,0 +1,36 @@
+# Frontend Development Dockerfile with hot reload
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install dependencies
+COPY package.json package-lock.json* ./
+RUN npm ci --prefer-offline --no-audit --progress=false
+
+# Copy config files
+COPY next.config.ts ./
+COPY tsconfig.json ./
+COPY tailwind.config.ts ./
+COPY postcss.config.mjs ./
+COPY eslint.config.mjs ./
+COPY .eslintrc.js ./
+
+# Copy source code
+COPY src ./src
+COPY public ./public
+
+# Expose port
+EXPOSE 3000
+
+# Disable file watching (dev container relies on volume restarts, not inotify)
+ENV CHOKIDAR_USEPOLLING=false
+ENV WATCHPACK_POLLING=false
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Container is healthy once the Next dev server responds.
+# First compile happens at startup, so allow a generous start period.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+  CMD wget -qO- http://127.0.0.1:3000/ || exit 1
+
+# Start without file watching
+CMD ["npm", "run", "dev", "--", "--watch=false"]

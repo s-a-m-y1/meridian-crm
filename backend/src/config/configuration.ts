@@ -11,6 +11,12 @@ export interface AppConfig {
     password: string;
     name: string;
   };
+  redis: {
+    host: string;
+    port: number;
+    password?: string;
+    db: number;
+  };
   jwt: {
     secret: string;
     expiresIn: string;
@@ -73,6 +79,12 @@ export const configuration = (): AppConfig => ({
     user: required('PGUSER'),
     password: required('PGPASSWORD'),
     name: required('PGDATABASE'),
+  },
+  redis: {
+    host: process.env.REDIS_HOST ?? 'localhost',
+    port: Number(process.env.REDIS_PORT ?? 6379),
+    password: process.env.REDIS_PASSWORD ?? undefined,
+    db: Number(process.env.REDIS_DB ?? 0),
   },
   jwt: {
     secret: required('JWT_SECRET'),

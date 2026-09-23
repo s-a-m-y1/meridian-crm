@@ -16,8 +16,18 @@ export class TasksService {
   ) {}
 
   async create(dto: CreateTaskDto, orgContext: OrgContext): Promise<Task> {
+    // Parse dueAt from string to Date
+    let dueAt: Date | undefined;
+    if (dto.dueAt) {
+      const parsed = new Date(dto.dueAt);
+      if (!isNaN(parsed.getTime())) {
+        dueAt = parsed;
+      }
+    }
+    
     const task = this.repo.create({
       ...dto,
+      dueAt,
       organizationId: orgContext.organizationId,
       ownerId: orgContext.userId,
       status: dto.status ?? 'PENDING',
@@ -44,7 +54,20 @@ export class TasksService {
   async update(id: string, dto: UpdateTaskDto, orgContext: OrgContext): Promise<Task> {
     const task = await this.findById(id, orgContext);
     this.checkAccess(task, orgContext);
+    
+    // Parse dueAt if provided
+    let dueAt: Date | undefined;
+    if (dto.dueAt) {
+      const parsed = new Date(dto.dueAt);
+      if (!isNaN(parsed.getTime())) {
+        dueAt = parsed;
+      }
+    }
+    
     Object.assign(task, dto);
+    if (dueAt) {
+      task.dueAt = dueAt;
+    }
     if (dto.status === 'COMPLETED' && !task.completedAt) {
       task.completedAt = new Date();
     }
@@ -60,24 +83,19 @@ export class TasksService {
   private buildBaseQuery(orgContext: OrgContext): SelectQueryBuilder<Task> {
     return this.repo
       .createQueryBuilder('task')
-      .where('task.organizationId = :orgId', { orgId: orgContext.organizationId });
+      .where('task.organizationId = :orgId', { orgId: orgContext.organizationId })
+      .andWhere('task.ownerId = :ownerId', { ownerId: orgContext.userId });
   }
 
   private applyFilters(qb: SelectQueryBuilder<Task>, query: TaskQueryDto): void {
-    if (query.search) {
-      qb.andWhere(
-        '(task.title ILIKE :search OR task.description ILIKE :search)',
-        { search: `%${query.search}%` },
-      );
-    }
     if (query.status) {
       qb.andWhere('task.status = :status', { status: query.status });
     }
     if (query.leadId) {
       qb.andWhere('task.leadId = :leadId', { leadId: query.leadId });
     }
-    if (query.ownerId) {
-      qb.andWhere('task.ownerId = :ownerId', { ownerId: query.ownerId });
+    if (query.search) {
+      qb.andWhere('task.title ILIKE :search', { search: `%${query.search}%` });
     }
   }
 
@@ -87,22 +105,15 @@ export class TasksService {
     qb.orderBy(`task.${sortBy}`, sortOrder as 'ASC' | 'DESC');
   }
 
-  private async paginate(
-    qb: SelectQueryBuilder<Task>,
-    query: TaskQueryDto,
-  ): Promise<PaginatedTasksDto> {
+  private async paginate(qb: SelectQueryBuilder<Task>, query: TaskQueryDto): Promise<PaginatedTasksDto> {
     const page = query.page ?? 1;
-    const limit = query.limit ?? 20;
-    const [data, total] = await qb
-      .skip((page - 1) * limit)
-      .take(limit)
-      .getManyAndCount();
-
+    const limit = Math.min(query.limit ?? 20, 100);
+    const [data, total] = await qb.skip((page - 1) * limit).take(limit).getManyAndCount();
     return {
       data,
+      total,
       page,
       limit,
-      total,
       totalPages: Math.ceil(total / limit),
     };
   }

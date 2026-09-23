@@ -18,6 +18,13 @@
     "noUnusedLocals": false,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "paths": {
+      "@common/*": ["src/common/*"],
+      "@modules/*": ["src/modules/*"],
+      "@security/*": ["src/security/*"],
+      "@queues/*": ["src/queues/*"],
+      "@observability/*": ["src/observability/*"]
+    }
   }
 }

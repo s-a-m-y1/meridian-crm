@@ -1,10 +1,12 @@
 import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
+import { v4 as uuidv4 } from 'uuid';
 import { UsersService } from '../users/users.service';
 import { OrganizationsService } from '../organizations/organizations.service';
 import { TokenService, TokenPair } from './token.service';
 import { PasswordResetService } from './password-reset.service';
+import { EmailService } from '../../email/email.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull } from 'typeorm';
 import { RefreshToken } from './entities/refresh-token.entity';
@@ -20,6 +22,7 @@ export class AuthService {
     private readonly orgs: OrganizationsService,
     private readonly tokens: TokenService,
     private readonly passwordReset: PasswordResetService,
+    private readonly emailService: EmailService,
     private readonly config: ConfigService,
     @InjectRepository(RefreshToken)
     private readonly refreshRepo: Repository<RefreshToken>,
@@ -32,6 +35,18 @@ export class AuthService {
     const passwordHash = await bcrypt.hash(dto.password, this.config.get<number>('bcryptRounds') ?? 12);
     const user = await this.users.create({ email: dto.email, name: dto.name, passwordHash });
     await this.orgs.createWithOwner(`${dto.name}'s Organization`, user.id);
+
+    // Generate email verification token
+    const verificationToken = uuidv4();
+    await this.users.setEmailVerificationToken(user.id, verificationToken);
+
+    // Send verification email
+    try {
+      await this.emailService.sendVerificationEmail(user.email, user.name, verificationToken);
+    } catch (error) {
+      // Log error but don't fail registration
+      console.error('Failed to send verification email:', error);
+    }
 
     return this.issueTokens(user.id, user.email);
   }
@@ -53,7 +68,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
 
-    // Reuse detection: if this family has been used since this token was issued, revoke all
+    // Reuse detection
     const familyUsed = await this.refreshRepo.findOne({
       where: { familyId: stored.familyId, revokedAt: IsNull() },
       order: { createdAt: 'DESC' },
@@ -66,7 +81,6 @@ export class AuthService {
       throw new UnauthorizedException('Token reuse detected — session revoked');
     }
 
-    // Rotate: revoke current, issue new pair with same family
     stored.revokedAt = new Date();
     await this.refreshRepo.save(stored);
 
@@ -85,12 +99,28 @@ export class AuthService {
   }
 
   async forgotPassword(dto: ForgotPasswordDto): Promise<{ message: string; token?: string }> {
-    return this.passwordReset.requestReset(dto.email);
+    const result = await this.passwordReset.requestReset(dto.email);
+    
+    // If user exists, send password reset email
+    const user = await this.users.findByEmail(dto.email);
+    if (user && result.token) {
+      try {
+        await this.emailService.sendPasswordResetEmail(user.email, user.name, result.token);
+      } catch (error) {
+        console.error('Failed to send password reset email:', error);
+      }
+    }
+    
+    return result;
   }
 
   async resetPassword(dto: ResetPasswordDto): Promise<void> {
     const passwordHash = await bcrypt.hash(dto.password, this.config.get<number>('bcryptRounds') ?? 12);
     await this.passwordReset.resetPassword(dto.token, passwordHash);
+  }
+
+  async verifyEmail(token: string): Promise<void> {
+    return this.users.verifyEmail(token);
   }
 
   private async issueTokens(userId: string, email: string, familyId?: string): Promise<TokenPair> {

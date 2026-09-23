@@ -6,3 +6,5 @@ export interface OrgContext {
   role: MemberRole;
   restrictedToOwnRecords: boolean;
 }
+
+export type AuthContext = OrgContext;

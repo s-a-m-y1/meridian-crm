@@ -1,10 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { configuration, validateEnv } from './config/configuration';
 import { AuthModule } from './modules/auth/auth.module';
+import { FilesModule } from './files/files.module';
+import { RealtimeModule } from './realtime/realtime.module';
+import { EmailModule } from './email/email.module';
+import { AIModule } from './ai/ai.module';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
 import { UsersModule } from './modules/users/users.module';
 import { CustomersModule } from './modules/customers/customers.module';
@@ -14,7 +17,11 @@ import { DealsModule } from './modules/deals/deals.module';
 import { TasksModule } from './modules/tasks/tasks.module';
 import { ActivitiesModule } from './modules/activities/activities.module';
 import { NotesModule } from './modules/notes/notes.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { HealthModule } from './health/health.module';
+import { QueueModule } from './queues/queue.module';
+import { ObservabilityModule } from './observability/observability.module';
+import { SecurityModule } from './security/security.module';
 import { AuthGuard } from './common/guards/auth.guard';
 
 @Module({
@@ -34,26 +41,14 @@ import { AuthGuard } from './common/guards/auth.guard';
         password: config.get<string>('database.password')!,
         database: config.get<string>('database.name')!,
         autoLoadEntities: true,
-        synchronize: false,
+        // Dev/test: create the schema automatically (the repo has no baseline
+        // migrations yet). Production stays strict — schema changes there
+        // must ship as real TypeORM migrations.
+        synchronize: config.get<string>('nodeEnv') !== 'production',
         logging: false,
         migrationsRun: config.get<string>('nodeEnv') === 'test',
         migrations: [__dirname + '/database/migrations/*{.ts,.js}'],
       }),
-    }),
-    ThrottlerModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => [
-        {
-          name: 'default',
-          ttl: config.get<number>('throttle.ttlMs') ?? 60000,
-          limit: config.get<number>('throttle.limit') ?? 300,
-        },
-        {
-          name: 'auth',
-          ttl: config.get<number>('throttle.authTtlMs') ?? 60000,
-          limit: config.get<number>('throttle.authLimit') ?? 10,
-        },
-      ],
     }),
     UsersModule,
     OrganizationsModule,
@@ -64,11 +59,17 @@ import { AuthGuard } from './common/guards/auth.guard';
     TasksModule,
     ActivitiesModule,
     NotesModule,
+    DashboardModule,
+    QueueModule,
+    ObservabilityModule,
+    SecurityModule,
     AuthModule,
-    HealthModule,
+    EmailModule,
+    FilesModule,
+    RealtimeModule,
+    AIModule,
   ],
   providers: [
-    { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: AuthGuard },
   ],
 })

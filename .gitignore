@@ -14,6 +14,10 @@ out/
 .env.*
 !.env.example
 
+# Agent tokens (local only — never commit)
+.ai/agent_token.env
+.ai/*.env
+
 # Logs
 logs/
 *.log

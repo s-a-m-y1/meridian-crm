@@ -25,6 +25,10 @@ export class User {
   @Column({ name: 'email_verified_at', nullable: true, type: 'timestamptz' })
   emailVerifiedAt: Date | null;
 
+  @Column({ name: 'email_verification_token', nullable: true, type: 'varchar', length: 36 })
+  @Exclude()
+  emailVerificationToken: string | null;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 

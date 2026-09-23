@@ -1,0 +1,32 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background: rounded square with dark teal-charcoal gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1B2A2A"/>
+      <stop offset="100%" stop-color="#12151C"/>
+    </linearGradient>
+    <linearGradient id="markGradient" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#D9AE5F"/>
+      <stop offset="100%" stop-color="#3E9C82"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bgGradient)"/>
+  
+  <!-- Globe mark: centered, with padding for small-size legibility -->
+  <g transform="translate(256, 256)">
+    <!-- Outer sphere outline -->
+    <circle r="140" stroke="url(#markGradient)" stroke-width="8" fill="none"/>
+    
+    <!-- Vertical meridian arc (line of longitude) -->
+    <path d="M0,-140 C0,-180 0,-180 0,-140" stroke="url(#markGradient)" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M0,140 C0,180 0,180 0,140" stroke="url(#markGradient)" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <ellipse rx="140" ry="40" stroke="url(#markGradient)" stroke-width="8" fill="none"/>
+    
+    <!-- Horizontal equator line -->
+    <line x1="-140" y1="0" x2="140" y2="0" stroke="url(#markGradient)" stroke-width="8" stroke-linecap="round"/>
+    
+    <!-- Location pin dot on meridian near top -->
+    <circle cx="0" cy="-100" r="12" fill="#D9AE5F"/>
+    <circle cx="0" cy="-100" r="14" stroke="#12151C" stroke-width="2" fill="none"/>
+  </g>
+</svg>

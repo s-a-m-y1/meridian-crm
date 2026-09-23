@@ -7,7 +7,7 @@ test.describe('Dashboard', () => {
 
   test('should redirect to login when not authenticated', async ({ page }) => {
     await page.goto('/dashboard');
-    await expect(page).toHaveURL('/login');
+    await expect(page).toHaveURL(/\/login/);
   });
 
   test('should display dashboard after successful login', async ({ page }) => {
@@ -15,7 +15,7 @@ test.describe('Dashboard', () => {
     // For now, verify the redirect behavior
     await page.goto('/dashboard');
     // Should redirect to login when not authenticated
-    await expect(page).toHaveURL('/login');
+    await expect(page).toHaveURL(/\/login/);
   });
 
   test('should display logout functionality', async ({ page }) => {

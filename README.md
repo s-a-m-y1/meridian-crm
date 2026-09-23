@@ -1,7 +1,57 @@
----
-name: skills-system-readme
-description: Master entry point for the AI Software Engineering Operating System
-version: 1.0.0
+# Meridian CRM
+
+[![CI](https://github.com/s-a-m-y1/meridian-crm/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/s-a-m-y1/meridian-crm/actions/workflows/ci-cd.yml)
+
+Production-grade **Real Estate CRM** with an AI intelligence layer — NestJS + TypeORM + PostgreSQL backend, Next.js 15 + React 19 frontend.
+
+## Screenshots
+
+| Dashboard | Leads Kanban |
+|-----------|--------------|
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Leads](docs/screenshots/leads.png) |
+
+| Deals Pipeline | Properties |
+|----------------|------------|
+| ![Deals](docs/screenshots/deals.png) | ![Properties](docs/screenshots/properties.png) |
+
+| Tasks | Activities |
+|-------|------------|
+| ![Tasks](docs/screenshots/tasks.png) | ![Activities](docs/screenshots/activities.png) |
+
+## Quick Start
+
+```bash
+# Full stack (Postgres, Redis, LocalStack, backend, frontend)
+docker-compose -f docker-compose.dev.yml up -d
+
+# Seed realistic demo data
+node scripts/seed-demo.mjs
+```
+
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:4000/api/v1 (docs at `/api/docs`)
+
+**Demo login:** `demo@meridian.crm` / `Demo1234!x`
+
+## Monorepo Layout
+
+| Path | What |
+|------|------|
+| `backend/` | NestJS API — auth (JWT + refresh rotation), multi-tenant orgs, leads/customers/properties/deals/tasks/activities/notes, AI layer (briefings, scoring, forecasting), files, observability |
+| `frontend/` | Next.js 15 App Router — dashboard, Kanban lead pipeline, deal pipeline, global search (⌘K), AI Copilot |
+| `scripts/` | `seed-demo.mjs` (demo data), `status_report.py`, `validate_skills_refs.py` |
+| `docs/screenshots/` | UI screenshots (regenerate: `node frontend/scripts/take-screenshots.mjs`) |
+
+## Quality Gates
+
+```bash
+cd backend  && npm run typecheck && npm run test     # 24 unit tests
+cd frontend && npm run typecheck && npm run test     # 24 Playwright E2E
+python3 scripts/validate_skills_refs.py             # doc path validation
+```
+
+CI runs these on every push — see `.github/workflows/ci-cd.yml`.
+
 ---
 
 # AI Software Engineering Operating System (Skills System)
@@ -73,7 +123,7 @@ See `.skills/INDEX.md` for the complete skill catalog with dependencies.
 
 - Boot file: [AGENT.md](AGENT.md)
 - Agent rules and conventions: [AGENTS.md](AGENTS.md)
-- Explanation of recent edits: [Expalin.md](Expalin.md)
+- Changelog / recent edits: [`.ai/changelog.md`](.ai/changelog.md)
 
 ## Templates & Helpers
 
@@ -145,6 +195,10 @@ python3 scripts/token_manager.py decrypt
 CI وملفات الأتمتة تعمل على GitHub Actions — الحالة تظهر في الشريط أعلاه. عندما تحتاج، أضف أي Badges إضافية تريدها.
 
 ## واجهة إدارة بسيطة (اختياري)
+
+> **تحذير أمان:** هذه الواجهة **لا تحتوي على أي مصادقة**. لا تشغّلها أبداً خارج
+> `localhost` (127.0.0.1) بدون إضافة طبقة مصادقة أولاً. أي شخص يصل إليها يستطيع
+> تشغيل المراجعات وإدارة التوكن.
 
 يمكنك تشغيل واجهة ويب محلية بسيطة لإدارة التوكن وتشغيل المراجعات يدويًا:
 

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
@@ -61,6 +61,14 @@ export class AuthController {
   async resetPassword(@Body() dto: ResetPasswordDto): Promise<{ message: string }> {
     await this.auth.resetPassword(dto);
     return { message: 'Password reset successful' };
+  }
+
+  @Public()
+  @Get('verify-email')
+  @ApiOperation({ summary: 'Verify email address with token' })
+  async verifyEmail(@Query('token') token: string): Promise<{ message: string }> {
+    await this.auth.verifyEmail(token);
+    return { message: 'Email verified successfully. You can now log in.' };
   }
 
   @Get('me')

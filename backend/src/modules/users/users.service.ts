@@ -31,7 +31,22 @@ export class UsersService {
     return this.repo.save(user);
   }
 
-  async verifyEmail(id: string): Promise<void> {
+  async setEmailVerificationToken(userId: string, token: string): Promise<void> {
+    const result = await this.repo.update(userId, { emailVerificationToken: token });
+    if (result.affected === 0) throw new NotFoundException('User not found');
+  }
+
+  async verifyEmail(token: string): Promise<void> {
+    const user = await this.repo.findOne({ where: { emailVerificationToken: token } });
+    if (!user) throw new NotFoundException('Invalid verification token');
+    
+    await this.repo.update(user.id, { 
+      emailVerifiedAt: new Date(),
+      emailVerificationToken: null 
+    });
+  }
+
+  async verifyEmailById(id: string): Promise<void> {
     const result = await this.repo.update(id, { emailVerifiedAt: new Date() });
     if (result.affected === 0) throw new NotFoundException('User not found');
   }
