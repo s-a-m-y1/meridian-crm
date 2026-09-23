@@ -2,7 +2,14 @@
 
 [![CI](https://github.com/s-a-m-y1/meridian-crm/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/s-a-m-y1/meridian-crm/actions/workflows/ci-cd.yml)
 
+**🌐 Live demo:** https://meridian-7r9jc4dt3-sam858y-5076s-projects.vercel.app
+
 Production-grade **Real Estate CRM** with an AI intelligence layer — NestJS + TypeORM + PostgreSQL backend, Next.js 15 + React 19 frontend.
+
+> **Note:** the live frontend is deployed on Vercel. Sign-in and API-backed features
+> come alive once it can reach a hosted backend — point `NEXT_PUBLIC_API_URL_INTERNAL`
+> at a public API URL (e.g. the backend deployed on Railway/Render; see
+> [Deployment](DEPLOYMENT.md)). Pages render fine in the meantime.
 
 ## Screenshots
 
@@ -51,6 +58,16 @@ python3 scripts/validate_skills_refs.py             # doc path validation
 ```
 
 CI runs these on every push — see `.github/workflows/ci-cd.yml`.
+
+## Deployment
+
+- **Frontend (Vercel)** — deployed: run `vercel --prod` from `frontend/`.
+  Set `NEXT_PUBLIC_API_URL_INTERNAL=https://<your-backend-host>/api/v1` once
+  the backend is hosted.
+- **Backend** — deploy `backend/` (Dockerfile provided) to any Node host
+  (Railway / Render / Fly) with a managed PostgreSQL + Redis, then set the
+  env vars from `backend/.env.example`. See [DEPLOYMENT.md](DEPLOYMENT.md)
+  for the full checklist.
 
 ---
 
