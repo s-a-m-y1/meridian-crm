@@ -2,14 +2,15 @@
 
 [![CI](https://github.com/s-a-m-y1/meridian-crm/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/s-a-m-y1/meridian-crm/actions/workflows/ci-cd.yml)
 
-**🌐 Live demo:** https://meridian-7r9jc4dt3-sam858y-5076s-projects.vercel.app
+**🌐 Live demo:** https://meridian-crm-xi.vercel.app (Demo login: `demo@meridian.crm` / `Demo1234!x`)
 
 Production-grade **Real Estate CRM** with an AI intelligence layer — NestJS + TypeORM + PostgreSQL backend, Next.js 15 + React 19 frontend.
 
-> **Note:** the live frontend is deployed on Vercel. Sign-in and API-backed features
-> come alive once it can reach a hosted backend — point `NEXT_PUBLIC_API_URL_INTERNAL`
-> at a public API URL (e.g. the backend deployed on Railway/Render; see
-> [Deployment](DEPLOYMENT.md)). Pages render fine in the meantime.
+> **Note:** the live demo is fully functional (sign-in included): the frontend runs
+> on Vercel, PostgreSQL is hosted on Neon, and the NestJS backend runs on a dev
+> machine exposed via a Cloudflare quick tunnel (Vercel proxies `/api/*` to it).
+> **The API goes offline when that machine sleeps/shuts down** — pages still render.
+> To bring the demo back after a restart: `scripts/online-demo.sh start`
 
 ## Screenshots
 
@@ -61,12 +62,16 @@ CI runs these on every push — see `.github/workflows/ci-cd.yml`.
 
 ## Deployment
 
-- **Frontend (Vercel)** — deployed: run `vercel --prod` from `frontend/`.
-  Set `NEXT_PUBLIC_API_URL_INTERNAL=https://<your-backend-host>/api/v1` once
-  the backend is hosted.
-- **Backend** — deploy `backend/` (Dockerfile provided) to any Node host
-  (Railway / Render / Fly) with a managed PostgreSQL + Redis, then set the
-  env vars from `backend/.env.example`. See [DEPLOYMENT.md](DEPLOYMENT.md)
+- **Frontend (Vercel)** — deployed: run `vercel --prod` from `frontend/`. Production
+  alias: https://meridian-crm-xi.vercel.app. `NEXT_PUBLIC_API_URL_INTERNAL` points
+  the `/api/*` rewrite at the public backend URL.
+- **Online demo (current setup)** — backend + Redis run locally and are exposed via
+  a Cloudflare quick tunnel; PostgreSQL lives on Neon. Manage it with
+  `scripts/online-demo.sh {start|stop|status|url}`. See
+  [DEPLOYMENT.md](DEPLOYMENT.md#online-demo-cloudflare-tunnel--neon).
+- **Backend (self-hosted prod path)** — deploy `backend/` (Dockerfile provided) to
+  any Node host (Railway / Render / Fly) with a managed PostgreSQL + Redis, then set
+  the env vars from `backend/.env.example`. See [DEPLOYMENT.md](DEPLOYMENT.md)
   for the full checklist.
 
 ---

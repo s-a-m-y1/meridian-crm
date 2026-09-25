@@ -40,6 +40,9 @@ import { AuthGuard } from './common/guards/auth.guard';
         username: config.get<string>('database.user')!,
         password: config.get<string>('database.password')!,
         database: config.get<string>('database.name')!,
+        ssl: config.get<boolean>('database.ssl')
+          ? { rejectUnauthorized: false }
+          : undefined,
         autoLoadEntities: true,
         // Dev/test: create the schema automatically (the repo has no baseline
         // migrations yet). Production stays strict — schema changes there

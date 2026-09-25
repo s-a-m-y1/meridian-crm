@@ -1,5 +1,44 @@
 # Meridian CRM — Deployment Guide
 
+## Online demo (Cloudflare Tunnel + Neon)
+
+**Currently live.** The public demo runs as:
+
+| Piece | Where | Notes |
+|-------|-------|-------|
+| Frontend | Vercel — https://meridian-crm-xi.vercel.app | permanent; proxies `/api/*` → tunnel |
+| Backend + Redis | dev machine (`node dist/src/main.js`, `docker` container `crm-redis-live`) | offline when the machine sleeps |
+| Database | Neon PostgreSQL (`meridian-crm`, eu-central-1) | hosted, persistent, free plan |
+| Public backend URL | Cloudflare **quick tunnel** → `http://localhost:4000` | URL rotates on every tunnel restart |
+
+Env for the live backend is kept (git-ignored) in `.ai/runtime.env`; API keys in
+`.ai/render_api_key.env`.
+
+```bash
+scripts/online-demo.sh start    # backend+redis+tunnel, repoint Vercel env, redeploy frontend (~3 min)
+scripts/online-demo.sh status   # health of redis/backend/tunnel
+scripts/online-demo.sh stop
+scripts/online-demo.sh url      # current public backend URL
+```
+
+Because quick-tunnel URLs change on restart, `start` updates the Vercel
+`NEXT_PUBLIC_API_URL_INTERNAL` production var and redeploys the frontend (the
+rewrite target is baked at build time, so a fresh deploy is required).
+
+The DB schema was provisioned once with:
+```bash
+cd backend
+DATABASE_URL="postgres://<neon-uri>?sslmode=require" npx ts-node scripts/sync-schema.ts
+```
+
+**Known constraint discovered while deploying:** `nest build` emits the entry at
+`dist/src/main.js` (because `ormconfig.ts`/`scripts/` sit outside `src/`), so the
+`start:prod` script and `backend/Dockerfile` CMD (`node dist/main.js`) do not
+match the actual build output — fix the CMD or the build config before building
+the image again. `scripts/online-demo.sh` already uses the correct path.
+
+---
+
 > **Implementation status:** Only the Docker Compose environments below are
 > actually implemented and tested today. The Kubernetes, CI/CD auto-deploy,
 > monitoring, and scaling sections further down are **planned but not yet

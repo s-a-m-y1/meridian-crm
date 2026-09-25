@@ -10,6 +10,7 @@ export interface AppConfig {
     user: string;
     password: string;
     name: string;
+    ssl: boolean;
   };
   redis: {
     host: string;
@@ -79,6 +80,8 @@ export const configuration = (): AppConfig => ({
     user: required('PGUSER'),
     password: required('PGPASSWORD'),
     name: required('PGDATABASE'),
+    // Set PGSSL=true for managed Postgres that requires TLS (e.g. Neon).
+    ssl: process.env.PGSSL === 'true',
   },
   redis: {
     host: process.env.REDIS_HOST ?? 'localhost',
