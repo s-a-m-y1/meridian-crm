@@ -5,7 +5,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { configuration, validateEnv } from './config/configuration';
 import { AuthModule } from './modules/auth/auth.module';
 import { FilesModule } from './files/files.module';
-import { RealtimeModule } from './realtime/realtime.module';
 import { EmailModule } from './email/email.module';
 import { AIModule } from './ai/ai.module';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
@@ -19,10 +18,22 @@ import { ActivitiesModule } from './modules/activities/activities.module';
 import { NotesModule } from './modules/notes/notes.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { HealthModule } from './health/health.module';
-import { QueueModule } from './queues/queue.module';
 import { ObservabilityModule } from './observability/observability.module';
 import { SecurityModule } from './security/security.module';
 import { AuthGuard } from './common/guards/auth.guard';
+
+// Queues (BullMQ/Redis) and WebSocket realtime need long-running processes.
+// On serverless hosts (Vercel) set QUEUES_ENABLED=false / REALTIME_ENABLED=false
+// to boot without Redis; AI background jobs and live updates degrade gracefully.
+// NOTE: lazy require() — a static import would load ESM-only deps (@nestjs/bullmq)
+// even when the module is disabled, crashing cold starts on Vercel.
+const queuesEnabled = process.env.QUEUES_ENABLED !== 'false';
+const realtimeEnabled = process.env.REALTIME_ENABLED !== 'false';
+/* eslint-disable @typescript-eslint/no-var-requires */
+const optionalModules = [
+  ...(queuesEnabled ? [require('./queues/queue.module').QueueModule] : []),
+  ...(realtimeEnabled ? [require('./realtime/realtime.module').RealtimeModule] : []),
+];
 
 @Module({
   imports: [
@@ -63,16 +74,14 @@ import { AuthGuard } from './common/guards/auth.guard';
     ActivitiesModule,
     NotesModule,
     DashboardModule,
-    QueueModule,
     ObservabilityModule,
     SecurityModule,
     AuthModule,
     EmailModule,
     FilesModule,
-    RealtimeModule,
     AIModule,
-  ],
-  providers: [
+    ...optionalModules,
+  ],  providers: [
     { provide: APP_GUARD, useClass: AuthGuard },
   ],
 })

@@ -1,5 +1,27 @@
 # Meridian CRM — Deployment Guide
 
+## Permanent tier (Vercel serverless + Neon)
+
+**Currently live, 24/7.** Uses only free no-card services:
+
+| Piece | Where |
+|-------|-------|
+| Frontend | Vercel — https://meridian-crm-xi.vercel.app |
+| Backend (serverless) | Vercel project `meridian-crm-api` — https://meridian-crm-api-two.vercel.app |
+| Database | Neon PostgreSQL (aws-eu-central-1), schema provisioned via `backend/scripts/sync-schema.ts` |
+
+- Serverless entrypoint: `backend/api/index.ts` (Express + shared
+  `src/app-bootstrap.ts`); routing via `backend/vercel.json` (`/(.*) → /api`).
+- Env on the backend project (Vercel dashboard): `NODE_ENV=production PGHOST/
+  PGPORT/PGUSER/PGPASSWORD/PGDATABASE PGSSL=true JWT_SECRET REFRESH_SECRET
+  BCRYPT_ROUNDS EMAIL_VERIFICATION_REQUIRED=false CORS_ORIGIN=<frontend URL>
+  QUEUES_ENABLED=false REALTIME_ENABLED=false AI_PROVIDER=mock LOG_DIR=/tmp`
+- `QUEUES_ENABLED=false` / `REALTIME_ENABLED=false` were added because BullMQ is
+  ESM-only (breaks Vercel's CJS runtime) and WebSockets need long-lived servers;
+  both modules lazy-load only when enabled. Trade-off: no scheduled AI jobs and
+  no realtime push on the permanent tier.
+- Redeploy backend: `cd backend && vercel --prod`. Frontend: `cd frontend && vercel --prod`.
+
 ## Online demo (Cloudflare Tunnel + Neon)
 
 **Currently live.** The public demo runs as:
@@ -31,11 +53,11 @@ cd backend
 DATABASE_URL="postgres://<neon-uri>?sslmode=require" npx ts-node scripts/sync-schema.ts
 ```
 
-**Known constraint discovered while deploying:** `nest build` emits the entry at
-`dist/src/main.js` (because `ormconfig.ts`/`scripts/` sit outside `src/`), so the
-`start:prod` script and `backend/Dockerfile` CMD (`node dist/main.js`) do not
-match the actual build output — fix the CMD or the build config before building
-the image again. `scripts/online-demo.sh` already uses the correct path.
+**Build output note:** `nest build` emits the entry at `dist/src/main.js` (because
+`ormconfig.ts`/`scripts/` sit outside `src/`). `start:prod` and `backend/Dockerfile`
+now point at the correct path, and the image was smoke-tested end-to-end
+(boots, connects to Neon with `PGSSL=true`, connects to Redis, serves
+`/api/v1/health/liveness`).
 
 ---
 

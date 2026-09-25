@@ -35,8 +35,14 @@ tunnel_url()  { grep -oE 'https://[a-z0-9.-]+\.trycloudflare\.com' "$TUNNEL_LOG"
 
 start() {
   echo "→ Redis…"
-  redis_up || docker run -d --name crm-redis-live -p 6379:6379 \
-    redis:7-alpine redis-server --requirepass redis_password >/dev/null
+  if ! redis_up; then
+    if docker ps -a --format '{{.Names}}' 2>/dev/null | grep -qx crm-redis-live; then
+      docker start crm-redis-live >/dev/null
+    else
+      docker run -d --name crm-redis-live --restart unless-stopped -p 6379:6379 \
+        redis:7-alpine redis-server --requirepass redis_password >/dev/null
+    fi
+  fi
 
   echo "→ Backend…"
   if ! backend_up; then
@@ -49,7 +55,7 @@ start() {
   echo "  backend OK (http://localhost:4000/api/v1)"
 
   echo "→ Cloudflare tunnel…"
-  pkill -f 'cloudflared tunnel --url' 2>/dev/null || true
+  pkill -f 'cloudflared tunnel --ur[l]' 2>/dev/null || true
   sleep 1
   setsid nohup cloudflared tunnel --url http://localhost:4000 --no-autoupdate \
     > "$TUNNEL_LOG" 2>&1 &
@@ -70,7 +76,7 @@ start() {
 }
 
 stop() {
-  pkill -f 'cloudflared tunnel --url' 2>/dev/null && echo "tunnel stopped" || echo "tunnel not running"
+  pkill -f 'cloudflared tunnel --ur[l]' 2>/dev/null && echo "tunnel stopped" || echo "tunnel not running"
   pkill -f 'node dist/src/main.js' 2>/dev/null && echo "backend stopped" || echo "backend not running"
   docker rm -f crm-redis-live >/dev/null 2>&1 && echo "redis stopped" || echo "redis not running"
 }

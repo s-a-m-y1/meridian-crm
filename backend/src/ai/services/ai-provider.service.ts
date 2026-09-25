@@ -34,6 +34,12 @@ export class AiProviderService {
       this.provider = this.buildNvidiaProvider();
     } else if (providerName === 'anthropic' && this.config.get('ANTHROPIC_API_KEY')) {
       this.provider = this.buildAnthropicProvider();
+    } else if (providerName === 'mock') {
+      // Explicit opt-in for demo/trial deployments without real AI keys.
+      this.logger.warn(
+        'AI_PROVIDER="mock" — serving canned AI responses. Set a real provider key for production.',
+      );
+      this.provider = this.buildMockProvider();
     } else if (this.config.get('NODE_ENV') === 'production') {
       // Fail fast on misconfigured production instead of serving mock data.
       throw new InternalServerErrorException(

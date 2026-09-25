@@ -1,7 +1,8 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Optional } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { TerminusModule, HealthCheck, HealthCheckService, HealthCheckResult, HealthIndicatorResult, TypeOrmHealthIndicator, MemoryHealthIndicator, DiskHealthIndicator } from '@nestjs/terminus';
-import { QueueService } from '../queues/queue.service';
+// Type-only import: keeps @nestjs/bullmq (ESM) out of the runtime require graph.
+import type { QueueService } from '../queues/queue.service';
 import { Public } from '../common/decorators/public.decorator';
 
 @ApiTags('Health')
@@ -12,7 +13,8 @@ export class HealthController {
     private readonly db: TypeOrmHealthIndicator,
     private readonly memory: MemoryHealthIndicator,
     private readonly disk: DiskHealthIndicator,
-    private readonly queueService: QueueService,
+    // Queues are optional: absent when QUEUES_ENABLED=false (serverless deploys).
+    @Optional() private readonly queueService?: QueueService,
   ) {}
 
   @Get()
@@ -55,6 +57,9 @@ export class HealthController {
   }
 
   private async checkQueue(name: string): Promise<HealthIndicatorResult> {
+    if (!this.queueService) {
+      return { [name]: { status: 'up', note: 'queues disabled' } };
+    }
     try {
       const stats = await this.queueService.getQueueStats(name);
       if (!stats) {

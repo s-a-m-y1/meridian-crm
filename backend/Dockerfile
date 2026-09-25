@@ -38,10 +38,13 @@ COPY --from=builder /app/package.json ./package.json
 # Copy any additional files needed at runtime
 COPY --from=builder /app/src/config ./src/config
 
+# Runtime needs a writable logs/ dir (winston creates it relative to cwd)
+RUN mkdir -p logs && chown -R nestjs:nodejs /app
+
 USER nestjs
 
 EXPOSE 4000
 
 ENV PORT=4000
 
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/src/main.js"]

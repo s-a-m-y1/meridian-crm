@@ -17,6 +17,17 @@ Format: Keep a Changelog (see `.skills/documentation/changelog.md`). Versioning:
 
 - README/DEPLOYMENT updated with the live URLs and demo operations.
 
+- 2026-09-25 — **Permanent serverless deploy**: backend now runs on Vercel
+  (`meridian-crm-api` → https://meridian-crm-api-two.vercel.app) with Neon
+  PostgreSQL — demo is online 24/7 with zero card-required services.
+  Frontend repointed via `NEXT_PUBLIC_API_URL_INTERNAL`.
+- `api/index.ts` + `src/app-bootstrap.ts` (shared Nest factory) + `vercel.json` (v2 rewrites).
+- Conditional modules: `QUEUES_ENABLED` / `REALTIME_ENABLED` env flags lazy-load
+  QueueModule (BullMQ) and RealtimeModule — required because `@nestjs/bullmq` is
+  ESM-only and crashes Vercel's CJS runtime even when unused.
+- `AI_PROVIDER=mock` explicit opt-in allowed in production (demo tier without AI keys).
+- security.controller.ts alias imports → relative (esbuild compatibility).
+
 ## 2026-09-16 — HISN audit scaffold
 
 - Added `.ai/tasks/T-100-HISN-website.md`, `T-101-HISN-android.md`, `T-102-HISN-backend.md`, `T-103-HISN-security.md`.

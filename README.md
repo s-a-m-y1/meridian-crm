@@ -6,11 +6,12 @@
 
 Production-grade **Real Estate CRM** with an AI intelligence layer — NestJS + TypeORM + PostgreSQL backend, Next.js 15 + React 19 frontend.
 
-> **Note:** the live demo is fully functional (sign-in included): the frontend runs
-> on Vercel, PostgreSQL is hosted on Neon, and the NestJS backend runs on a dev
-> machine exposed via a Cloudflare quick tunnel (Vercel proxies `/api/*` to it).
-> **The API goes offline when that machine sleeps/shuts down** — pages still render.
-> To bring the demo back after a restart: `scripts/online-demo.sh start`
+> **Note:** the live demo is fully functional **24/7** (sign-in included): the
+> frontend and backend both run on Vercel (backend serverless:
+> https://meridian-crm-api-two.vercel.app) with a hosted Neon PostgreSQL.
+> In this permanent tier, scheduled AI jobs and WebSocket live-updates are
+> disabled (mock AI responses). For the full-featured build (real AI queues +
+> realtime), run the local stack and expose it via `scripts/online-demo.sh start`
 
 ## Screenshots
 

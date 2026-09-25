@@ -1,9 +1,9 @@
 import { Controller, Get, Post, Body, UseGuards, Request, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { AuthGuard } from '@common/guards/auth.guard';
-import { OrganizationMemberGuard } from '@common/guards/organization-member.guard';
-import { RolesGuard } from '@common/guards/roles.guard';
-import { Roles } from '@common/decorators/roles.decorator';
+import { AuthGuard } from '../common/guards/auth.guard';
+import { OrganizationMemberGuard } from '../common/guards/organization-member.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { Roles } from '../common/decorators/roles.decorator';
 import { PasswordStrengthService } from './password-strength.service';
 import { SecurityAuditService } from './security-audit.service';
 
