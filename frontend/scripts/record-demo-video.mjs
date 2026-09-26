@@ -112,6 +112,12 @@ try {
 } catch (err) {
   fail('RUN', err);
 } finally {
+  // Playwright deletes context videos unless saveAs() is called first.
+  try {
+    await page.video()?.saveAs(resolve(OUT_DIR, 'meridian-demo-verification.webm'));
+  } catch (e) {
+    console.error('video save failed:', e?.message?.split('\n')[0]);
+  }
   await context.close();
   await browser.close();
 }
