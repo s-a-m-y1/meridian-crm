@@ -11,15 +11,19 @@ import { EmailService } from './email.service';
     MailerModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        transport: {
-          host: configService.get<string>('SMTP_HOST') || 'smtp.example.com',
-          port: configService.get<number>('SMTP_PORT') || 587,
-          secure: configService.get<boolean>('SMTP_SECURE') || false,
-          auth: {
-            user: configService.get<string>('SMTP_USER') || '',
-            pass: configService.get<string>('SMTP_PASS') || '',
-          },
-        },
+        transport: configService.get<string>('SMTP_HOST')
+          ? {
+              host: configService.get<string>('SMTP_HOST'),
+              port: configService.get<number>('SMTP_PORT') || 587,
+              secure: configService.get<boolean>('SMTP_SECURE') || false,
+              auth: {
+                user: configService.get<string>('SMTP_USER') || '',
+                pass: configService.get<string>('SMTP_PASS') || '',
+              },
+            }
+          // No SMTP configured (demo/free tiers): compose in-memory instead of
+          // attempting a network dial that fails slowly on every auth event.
+          : { streamTransport: true, buffer: true },
         defaults: {
           from: `"${configService.get<string>('APP_NAME') || 'E-commers-Crm'}" <${configService.get<string>('SMTP_FROM') || 'noreply@example.com'}>`,
         },

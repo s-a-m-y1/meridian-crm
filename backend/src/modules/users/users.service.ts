@@ -11,7 +11,18 @@ export class UsersService {
   ) {}
 
   async findById(id: string): Promise<User | null> {
-    return this.repo.findOne({ where: { id } });
+    return this.repo
+      .createQueryBuilder('user')
+      .where('user.id = :id', { id })
+      .addSelect('user.passwordHash') // select:false on the entity — needed by auth flows
+      .getOne();
+  }
+
+  async updateProfile(id: string, data: { name: string }): Promise<User> {
+    const user = await this.repo.findOne({ where: { id } });
+    if (!user) throw new NotFoundException('User not found');
+    user.name = data.name;
+    return this.repo.save(user);
   }
 
   async findByEmail(email: string): Promise<User | null> {

@@ -2,6 +2,29 @@ import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "ax
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
 
+// Remove empty-string fields from payloads: the backend validates with
+// class-validator where "" fails @IsEmail/@IsPhoneNumber instead of being
+// treated as "not provided" — this was silently breaking create forms.
+function stripEmptyStrings(data: unknown): unknown {
+  if (data === null || typeof data !== "object" || Array.isArray(data)) return data;
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(data as Record<string, unknown>)) {
+    if (v === "") continue;
+    out[k] = v;
+  }
+  return out;
+}
+
+// Extract a human-readable message from an API error (validation details included).
+export function apiErrorMessage(err: unknown, fallback: string): string {
+  const server = (err as { response?: { data?: { message?: string; errors?: string[] } } })
+    ?.response?.data;
+  if (Array.isArray(server?.errors) && server!.errors!.length > 0) {
+    return server!.errors!.join(" • ");
+  }
+  return server?.message || fallback;
+}
+
 class ApiClient {
   private client: AxiosInstance;
   private refreshPromise: Promise<string> | null = null;
@@ -22,6 +45,9 @@ class ApiClient {
           if (token) {
             config.headers.Authorization = `Bearer ${token}`;
           }
+        }
+        if (config.data && (config.method === "post" || config.method === "patch")) {
+          config.data = stripEmptyStrings(config.data);
         }
         return config;
       },
@@ -78,9 +104,11 @@ class ApiClient {
       localStorage.setItem("access_token", accessToken);
       localStorage.setItem("refresh_token", newRefreshToken);
       
-      // Also set cookies for middleware
-      document.cookie = `access_token=${accessToken}; path=/; max-age=86400; SameSite=Lax`;
-      document.cookie = `refresh_token=${newRefreshToken}; path=/; max-age=2592000; SameSite=Lax; HttpOnly`;
+      // Also set cookies for middleware — persistent for the WHOLE refresh
+      // session (30d): a 24h access-cookie TTL used to boot users to /login
+      // after a day although the backend session was still valid.
+      document.cookie = `access_token=${accessToken}; path=/; max-age=2592000; SameSite=Lax`;
+      document.cookie = `refresh_token=${newRefreshToken}; path=/; max-age=2592000; SameSite=Lax`;
       
       return accessToken;
     })();
@@ -94,7 +122,7 @@ class ApiClient {
 
   setAuthToken(token: string) {
     localStorage.setItem("access_token", token);
-    document.cookie = `access_token=${token}; path=/; max-age=86400; SameSite=Lax`;
+    document.cookie = `access_token=${token}; path=/; max-age=2592000; SameSite=Lax`;
   }
 
   clearAuth() {
@@ -110,7 +138,7 @@ class ApiClient {
     const { accessToken, refreshToken } = response.data;
     localStorage.setItem("access_token", accessToken);
     localStorage.setItem("refresh_token", refreshToken);
-    document.cookie = `access_token=${accessToken}; path=/; max-age=86400; SameSite=Lax`;
+    document.cookie = `access_token=${accessToken}; path=/; max-age=2592000; SameSite=Lax`;
     document.cookie = `refresh_token=${refreshToken}; path=/; max-age=2592000; SameSite=Lax; HttpOnly`;
     return response.data;
   }
@@ -120,7 +148,7 @@ class ApiClient {
     const { accessToken, refreshToken } = response.data;
     localStorage.setItem("access_token", accessToken);
     localStorage.setItem("refresh_token", refreshToken);
-    document.cookie = `access_token=${accessToken}; path=/; max-age=86400; SameSite=Lax`;
+    document.cookie = `access_token=${accessToken}; path=/; max-age=2592000; SameSite=Lax`;
     document.cookie = `refresh_token=${refreshToken}; path=/; max-age=2592000; SameSite=Lax; HttpOnly`;
     return response.data;
   }
@@ -141,6 +169,23 @@ class ApiClient {
 
   async me() {
     return this.client.get("/auth/me");
+  }
+
+  // Settings / account management
+  async updateProfile(data: { name: string }) {
+    return this.client.patch("/users/me", data);
+  }
+
+  async getCurrentOrganization() {
+    return this.client.get("/organizations/current");
+  }
+
+  async updateCurrentOrganization(data: { name: string }) {
+    return this.client.patch("/organizations/current", data);
+  }
+
+  async changePassword(data: { currentPassword: string; newPassword: string }) {
+    return this.client.patch("/auth/change-password", data);
   }
 
   // Customers

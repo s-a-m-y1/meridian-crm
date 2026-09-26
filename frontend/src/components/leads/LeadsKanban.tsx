@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Separator } from "@/components/ui/Separator";
 import { Plus, Search, Filter, ChevronLeft, ChevronRight, MoreHorizontal, Edit, Trash2, Eye, Target, DollarSign, MapPin, Phone, Mail, Users, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { api } from "@/lib/api";
+import { api, apiErrorMessage } from "@/lib/api";
 
 const LEAD_STATUSES = [
   { value: "NEW", label: "New", color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" },
@@ -418,16 +418,19 @@ function CreateLeadForm({ onClose, onSuccess }: { onClose: () => void; onSuccess
     budgetMin: "", budgetMax: "", requestedPropertyType: "", requestedLocation: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError("");
     try {
       await api.createLead(formData);
       onSuccess();
       onClose();
     } catch (error) {
       console.error("Failed to create lead:", error);
+      setError(apiErrorMessage(error, "Failed to create lead. Please check the fields."));
     } finally {
       setIsSubmitting(false);
     }
@@ -435,6 +438,11 @@ function CreateLeadForm({ onClose, onSuccess }: { onClose: () => void; onSuccess
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {error && (
+        <div className="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400 text-sm">
+          {error}
+        </div>
+      )}
       <div>
         <label className="block text-sm font-medium mb-1">Name *</label>
         <Input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="John Doe" />

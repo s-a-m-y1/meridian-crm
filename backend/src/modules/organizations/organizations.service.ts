@@ -78,6 +78,13 @@ export class OrganizationsService {
     return this.orgRepo.findOne({ where: { id } });
   }
 
+  async updateName(id: string, name: string): Promise<Organization> {
+    const org = await this.orgRepo.findOne({ where: { id } });
+    if (!org) throw new NotFoundException('Organization not found');
+    org.name = name;
+    return this.orgRepo.save(org);
+  }
+
   async updateSettings(
     organizationId: string,
     settings: Record<string, unknown>,

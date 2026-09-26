@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/Select";
 import { Plus, Search, Filter, DollarSign, Target, TrendingUp, Loader2, ChevronLeft, ChevronRight, Edit, Trash2, Eye, MoreHorizontal, Home, Building, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { api } from "@/lib/api";
+import { api, apiErrorMessage } from "@/lib/api";
 
 interface Deal {
   id: string;
@@ -431,11 +431,30 @@ function CreateDealForm({ onClose, onSuccess }: { onClose: () => void; onSuccess
   const [formData, setFormData] = useState({
     value: "", stage: "PROSPECTING", leadId: "", propertyId: "", expectedCloseDate: "",
   });
+  const [leads, setLeads] = useState<Array<{ id: string; name?: string; firstName?: string; lastName?: string; email?: string }>>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  // The API requires a valid lead UUID — offer a picker instead of forcing
+  // users to paste a UUID by hand.
+  useEffect(() => {
+    api.getLeads({ limit: 100 })
+      .then((res) => {
+        const data = (res.data?.data ?? res.data ?? []) as Array<{ id: string }>;
+        setLeads(data);
+      })
+      .catch(() => setLeads([]));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError("");
+    if (!formData.leadId) {
+      setError("Please select a lead for this deal.");
+      setIsSubmitting(false);
+      return;
+    }
     try {
       await api.createDeal({
         ...formData,
@@ -446,6 +465,7 @@ function CreateDealForm({ onClose, onSuccess }: { onClose: () => void; onSuccess
       onClose();
     } catch (error) {
       console.error("Failed to create deal:", error);
+      setError(apiErrorMessage(error, "Failed to create deal. Please check the fields."));
     } finally {
       setIsSubmitting(false);
     }
@@ -453,6 +473,11 @@ function CreateDealForm({ onClose, onSuccess }: { onClose: () => void; onSuccess
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {error && (
+        <div className="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400 text-sm">
+          {error}
+        </div>
+      )}
       <div>
         <label className="block text-sm font-medium mb-1">Deal Value *</label>
         <Input type="number" required value={formData.value} onChange={e => setFormData({...formData, value: e.target.value})} placeholder="500000" />
@@ -467,8 +492,17 @@ function CreateDealForm({ onClose, onSuccess }: { onClose: () => void; onSuccess
         </Select>
       </div>
       <div>
-        <label className="block text-sm font-medium mb-1">Lead ID</label>
-        <Input value={formData.leadId} onChange={e => setFormData({...formData, leadId: e.target.value})} placeholder="Lead UUID" />
+        <label className="block text-sm font-medium mb-1">Lead *</label>
+        <Select value={formData.leadId} onValueChange={v => setFormData({...formData, leadId: v})}>
+          <SelectTrigger><SelectValue placeholder="Select a lead" /></SelectTrigger>
+          <SelectContent>
+            {leads.map(l => (
+              <SelectItem key={l.id} value={l.id}>
+                {l.name || [l.firstName, l.lastName].filter(Boolean).join(" ") || l.email || l.id}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       <div>
         <label className="block text-sm font-medium mb-1">Property ID</label>

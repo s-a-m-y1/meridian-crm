@@ -51,7 +51,11 @@ export function RegisterForm() {
       router.push(redirect);
       router.refresh();
     } catch (err: any) {
-      setError(err.response?.data?.message || "Registration failed. Please try again.");
+      const server = err.response?.data;
+      const details = Array.isArray(server?.errors) && server.errors.length
+        ? server.errors.join(" • ")
+        : server?.message;
+      setError(details || "Registration failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -99,6 +103,9 @@ export function RegisterForm() {
                     disabled={isLoading}
                   />
                 </div>
+                {errors.name && (
+                  <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{errors.name.message}</p>
+                )}
               </div>
 
               <div>
@@ -116,6 +123,9 @@ export function RegisterForm() {
                     disabled={isLoading}
                   />
                 </div>
+                {errors.email && (
+                  <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{errors.email.message}</p>
+                )}
               </div>
 
               <div>
@@ -141,6 +151,9 @@ export function RegisterForm() {
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
+                {errors.password && (
+                  <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{errors.password.message}</p>
+                )}
               </div>
 
               <div>
@@ -166,6 +179,9 @@ export function RegisterForm() {
                     {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
+                {errors.confirmPassword && (
+                  <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{errors.confirmPassword.message}</p>
+                )}
               </div>
 
               <Button type="submit" className="w-full" disabled={isLoading} size="lg">

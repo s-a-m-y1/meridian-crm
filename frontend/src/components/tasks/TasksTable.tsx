@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/Badge";
 import { Plus, Search, Filter, CheckSquare, Calendar, Clock, Loader2, ChevronLeft, ChevronRight, Edit, Trash2, Eye, MoreHorizontal, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { api } from "@/lib/api";
+import { api, apiErrorMessage } from "@/lib/api";
 
 interface Task {
   id: string;
@@ -342,10 +342,12 @@ function CreateTaskForm({ onClose, onSuccess }: { onClose: () => void; onSuccess
     title: "", description: "", status: "PENDING", dueAt: "", leadId: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError("");
     try {
       await api.createTask({
         ...formData,
@@ -355,6 +357,7 @@ function CreateTaskForm({ onClose, onSuccess }: { onClose: () => void; onSuccess
       onClose();
     } catch (error) {
       console.error("Failed to create task:", error);
+      setError(apiErrorMessage(error, "Failed to create task. Please check the fields."));
     } finally {
       setIsSubmitting(false);
     }
@@ -362,6 +365,11 @@ function CreateTaskForm({ onClose, onSuccess }: { onClose: () => void; onSuccess
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {error && (
+        <div className="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400 text-sm">
+          {error}
+        </div>
+      )}
       <div>
         <label className="block text-sm font-medium mb-1">Title *</label>
         <Input required value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} placeholder="Call client" />

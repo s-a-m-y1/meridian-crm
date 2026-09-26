@@ -36,8 +36,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const initAuth = async () => {
-      const token = localStorage.getItem("access_token");
-      if (token) {
+      // Rehydrate whenever ANY token exists: an expired access token is fine —
+      // the api client interceptor refreshes it automatically (900s TTL), and
+      // the 30-day refresh token is the real session.
+      const hasSession =
+        localStorage.getItem("access_token") || localStorage.getItem("refresh_token");
+      if (hasSession) {
         await refreshUser();
       }
       setLoading(false);

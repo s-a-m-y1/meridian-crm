@@ -45,7 +45,11 @@ export function LoginForm() {
       router.push(redirect);
       router.refresh();
     } catch (err: any) {
-      setError(err.response?.data?.message || "Invalid email or password");
+      const server = err.response?.data;
+      const details = Array.isArray(server?.errors) && server.errors.length
+        ? server.errors.join(" • ")
+        : server?.message;
+      setError(details || "Invalid email or password");
     } finally {
       setIsLoading(false);
     }
@@ -93,6 +97,9 @@ export function LoginForm() {
                     disabled={isLoading}
                   />
                 </div>
+                {errors.email && (
+                  <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{errors.email.message}</p>
+                )}
               </div>
 
               <div>
@@ -126,6 +133,9 @@ export function LoginForm() {
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
+                {errors.password && (
+                  <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{errors.password.message}</p>
+                )}
               </div>
 
               <Button type="submit" className="w-full" disabled={isLoading} size="lg">

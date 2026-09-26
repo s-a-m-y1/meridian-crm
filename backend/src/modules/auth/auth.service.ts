@@ -119,6 +119,23 @@ export class AuthService {
     await this.passwordReset.resetPassword(dto.token, passwordHash);
   }
 
+  async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void> {
+    const user = await this.users.findById(userId);
+    if (!user) throw new UnauthorizedException('User not found');
+
+    const ok = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!ok) throw new ConflictException('Current password is incorrect');
+
+    const passwordHash = await bcrypt.hash(newPassword, this.config.get<number>('bcryptRounds') ?? 12);
+    await this.users.updatePassword(user.id, passwordHash);
+
+    // Password change revokes every other live session for the user.
+    await this.refreshRepo.update(
+      { userId: user.id, revokedAt: IsNull() },
+      { revokedAt: new Date() },
+    );
+  }
+
   async verifyEmail(token: string): Promise<void> {
     return this.users.verifyEmail(token);
   }

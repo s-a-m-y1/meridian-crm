@@ -51,6 +51,7 @@ export class EmailService {
         verificationUrl,
         expiresIn: '24 hours',
         supportEmail: process.env.SUPPORT_EMAIL || 'support@example.com',
+        year: new Date().getFullYear(),
       },
     });
   }
@@ -67,6 +68,7 @@ export class EmailService {
         resetUrl,
         expiresIn: '1 hour',
         supportEmail: process.env.SUPPORT_EMAIL || 'support@example.com',
+        year: new Date().getFullYear(),
       },
     });
   }
@@ -82,6 +84,7 @@ export class EmailService {
         name,
         loginUrl,
         supportEmail: process.env.SUPPORT_EMAIL || 'support@example.com',
+        year: new Date().getFullYear(),
       },
     });
   }
