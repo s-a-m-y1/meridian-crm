@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsEnum, IsNumber, IsUUID, Min, Max, Length, MaxLength, ValidateIf } from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsNumber, IsUUID, IsEmail, Min, MaxLength, ValidateIf } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { LeadStatus, LeadSource } from '../lead.entity';
@@ -18,6 +18,25 @@ export class CreateLeadDto {
   @IsOptional()
   @IsUUID()
   customerId?: string;
+
+  // Inline contact (used when the lead is created without an existing
+  // customer) — the service creates/links a Customer from these fields.
+  @ValidateIf((o: CreateLeadDto) => !o.customerId)
+  @ApiPropertyOptional({ example: 'Ahmed Hassan' })
+  @IsString()
+  @MaxLength(120)
+  name?: string;
+
+  @ApiPropertyOptional({ example: 'ahmed@example.com' })
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+
+  @ApiPropertyOptional({ example: '+201012345678' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(30)
+  phone?: string;
 
   @ApiPropertyOptional({ example: 500000 })
   @IsOptional()

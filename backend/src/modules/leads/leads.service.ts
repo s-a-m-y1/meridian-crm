@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { Lead } from './lead.entity';
+import { Customer } from '../customers/customer.entity';
 import { CreateLeadDto } from './dto/create-lead.dto';
 import { UpdateLeadDto } from './dto/update-lead.dto';
 import { LeadQueryDto, LeadSortBy, SortOrder } from './dto/lead-query.dto';
@@ -13,34 +14,76 @@ export class LeadsService {
   constructor(
     @InjectRepository(Lead)
     private readonly repo: Repository<Lead>,
+    @InjectRepository(Customer)
+    private readonly customersRepo: Repository<Customer>,
   ) {}
 
   async create(dto: CreateLeadDto, orgContext: OrgContext): Promise<Lead> {
+    // Leads link to a customer — the UI sends inline contact info
+    // (name/email/phone), so create the customer first when no id is given.
+    let customerId = dto.customerId;
+    if (!customerId) {
+      if (!dto.name || !dto.name.trim()) {
+        throw new BadRequestException('Either customerId or a contact name is required');
+      }
+      const customer = this.customersRepo.create({
+        name: dto.name.trim(),
+        email: dto.email,
+        phone: dto.phone,
+        organizationId: orgContext.organizationId,
+      });
+      customerId = (await this.customersRepo.save(customer)).id;
+    } else {
+      const customer = await this.customersRepo.findOne({
+        where: { id: customerId, organizationId: orgContext.organizationId },
+      });
+      if (!customer) {
+        throw new BadRequestException('Customer not found in this organization');
+      }
+    }
+
     const lead = this.repo.create({
-      ...dto,
-      organizationId: orgContext.organizationId,
-      ownerId: orgContext.userId,
       status: dto.status ?? 'NEW',
+      source: dto.source,
+      customerId,
       budgetMin: dto.budgetMin?.toString(),
       budgetMax: dto.budgetMax?.toString(),
+      requestedPropertyType: dto.requestedPropertyType,
+      requestedLocation: dto.requestedLocation,
+      organizationId: orgContext.organizationId,
+      ownerId: orgContext.userId,
     });
     return this.repo.save(lead);
   }
 
+  private withContact(lead: Lead): Lead & { name?: string; email?: string; phone?: string } {
+    const customer = (lead as Lead & { customer?: Customer }).customer;
+    return {
+      ...lead,
+      name: customer?.name ?? undefined,
+      email: customer?.email ?? undefined,
+      phone: customer?.phone ?? undefined,
+    };
+  }
+
   async findAll(query: LeadQueryDto, orgContext: OrgContext): Promise<PaginatedLeadsDto> {
-    const qb = this.buildBaseQuery(orgContext);
+    const qb = this.buildBaseQuery(orgContext)
+      .leftJoinAndSelect('lead.customer', 'customer');
     this.applyFilters(qb, query);
     this.applySorting(qb, query);
-    return this.paginate(qb, query);
+    const result = await this.paginate(qb, query);
+    return { ...result, data: result.data.map((l) => this.withContact(l)) };
   }
 
   async findById(id: string, orgContext: OrgContext): Promise<Lead> {
-    const lead = await this.repo.findOne({
-      where: { id, organizationId: orgContext.organizationId },
-    });
+    const lead = await this.repo
+      .createQueryBuilder('lead')
+      .leftJoinAndSelect('lead.customer', 'customer')
+      .where('lead.id = :id AND lead.organizationId = :orgId', { id, orgId: orgContext.organizationId })
+      .getOne();
     if (!lead) throw new NotFoundException('Lead not found');
     this.checkAccess(lead, orgContext);
-    return lead;
+    return this.withContact(lead) as Lead;
   }
 
   async update(id: string, dto: UpdateLeadDto, orgContext: OrgContext): Promise<Lead> {

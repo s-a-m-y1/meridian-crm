@@ -3,10 +3,13 @@ import {
   CreateDateColumn,
   Entity,
   Index,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
+import { Customer } from '../customers/customer.entity';
 
 export enum LeadStatus {
   NEW = 'NEW',
@@ -45,6 +48,10 @@ export class Lead {
 
   @Column({ name: 'customer_id', type: 'uuid', nullable: true })
   customerId: string | null;
+
+  @ManyToOne(() => Customer, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'customer_id' })
+  customer?: Customer;
 
   @Column({ name: 'owner_id', type: 'uuid' })
   ownerId: string;
