@@ -4,6 +4,35 @@
 
 **🌐 Live demo:** https://meridian-crm-xi.vercel.app (Demo login: `demo@meridian.crm` / `Demo1234!x`)
 
+**📦 Source code (GitHub):** https://github.com/s-a-m-y1/meridian-crm
+**🔧 Backend API:** https://meridian-crm-api-two.vercel.app/api/v1
+
+## What is Meridian CRM? (Business)
+
+**Meridian CRM** is a production-grade **Real Estate CRM** — a SaaS platform that
+lets real-estate agencies run their entire sales operation online:
+
+- **Capture** leads from every channel (website, referral, phone, walk-in…) and
+  track them on a Kanban pipeline (New → Contacted → Qualified → Converted).
+- **Convert** leads into customers, match them to properties (apartments,
+  villas, commercial…), and manage the full deal lifecycle with values,
+  stages and expected close dates.
+- **Run the team**: multi-tenant organizations (each agency gets its own
+  isolated workspace), roles (owner/admin/manager/agent), tasks and activity
+  timelines, global search (⌘K).
+- **AI intelligence layer**: lead scoring, daily briefings, deal forecasting,
+  property matching and a copilot chat.
+
+**Business flow:** Lead → Qualification → Property match → Deal → Close → Customer.
+
+## ما هو Meridian CRM؟ (شرح المشروع تجارياً)
+
+**Meridian CRM** منصة SaaS لإدارة علاقات العملاء **لشركات ومكاتب العقارات** —
+تدير دورة البيع كاملة أونلاين: استقطاب العملاء المحتملين من كل القنوات، متابعتهم
+على لوحة كانبان حتى التأهيل، مطابقتهم بالعقارات المناسبة، إدارة الصفقات وقيمها
+ومراحلها، تنظيم فريق العمل بأدوار ومستأجرين معزولين، مع طبقة ذكاء اصطناعي
+(تنقيط العملاء، تقارير يومية، توقعات الصفقات، ومساعد ذكي).
+
 Production-grade **Real Estate CRM** with an AI intelligence layer — NestJS + TypeORM + PostgreSQL backend, Next.js 15 + React 19 frontend.
 
 > **Note:** the live demo is fully functional **24/7** (sign-in included): the
