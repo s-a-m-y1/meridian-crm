@@ -44,6 +44,10 @@ Production-grade **Real Estate CRM** with an AI intelligence layer — NestJS + 
 
 ## Screenshots
 
+**🎬 Live verification video** (login → dashboard → create lead → settings → reload still signed-in → logout):
+
+![Meridian CRM — live demo verification](docs/videos/meridian-demo-verification.mp4)
+
 | Dashboard | Leads Kanban |
 |-----------|--------------|
 | ![Dashboard](docs/screenshots/dashboard.png) | ![Leads](docs/screenshots/leads.png) |
